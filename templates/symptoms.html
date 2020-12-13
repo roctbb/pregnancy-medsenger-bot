@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Записать симптом</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        input[type='checkbox'] {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid gray;
+
+        }
+
+        .form-check label {
+            padding-left: 15px;
+        }
+
+        input[type='checkbox']:checked {
+            background: lightpink;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container" style="margin-top: 15px;">
+    <h4>Записать симптом</h4>
+
+    <form method="POST" style="margin-top: 25px; font-size: 120%;">
+        {% if contract.week() >= 20 %}
+            <div class="form-group">
+                <strong>Головная боль</strong>
+                <input name="headache" type="number" min="0" max="10"/>
+                <p>Если у вас болит голова, укажите интенсивность боли по шкале от 1 до 10.</p>
+            </div>
+        {% endif %}
+
+        <div class="form-group">
+            <strong>Рвота</strong>
+            <input name="vomiting" type="number" min="0" max="10"/>
+            <p>Если у вас была врота, укажите сколько раз.</p>
+        </div>
+
+
+        <div class="form-check">
+            <input type="checkbox" name="stomachache" value="warning" class="form-check-input"><label
+                class="form-check-label">Болит живот.</label>
+        </div>
+
+        {% if contract.week() >= 20 %}
+            <div class="form-check">
+                <input type="checkbox" name="vision_problems" value="warning" class="form-check-input"><label
+                    class="form-check-label">Нарушение зрения в виде пелены, тумана и «мелькания мушек».</label>
+            </div>
+        {% endif %}
+
+        {% if contract.week() >= 23 and not contract.is_born %}
+            <div class="form-check">
+                <input type="checkbox" name="itching" value="warning" class="form-check-input"><label
+                    class="form-check-label">Генерализованный кожный зуд, усиливающийся ночью.</label>
+            </div>
+        {% endif %}
+
+        {% if contract.week() >= 20 and not contract.is_born %}
+            <div class="form-check">
+                <input type="checkbox" name="swelling" value="warning" class="form-check-input"><label
+                    class="form-check-label">Генерализованные отёки.</label>
+            </div>
+        {% endif %}
+
+
+        {% if contract.week() >= 14 and not contract.is_born %}
+            <div class="form-check">
+                <input type="checkbox" name="liquid_discharge" value="warning" class="form-check-input"><label
+                    class="form-check-label">Жидкие светлые выделения из половых путей.</label>
+            </div>
+        {% endif %}
+
+
+        <div class="form-check">
+            <input type="checkbox" name="blood_discharge" value="warning" class="form-check-input"><label
+                class="form-check-label">Кровянистые выделения из половых путей.</label>
+        </div>
+
+        <div class="form-group" style="margin-top: 25px;">
+            <input type="submit" class="btn-success btn" value="Отправить"/>
+        </div>
+    </form>
+</div>
+</body>
+</html>
