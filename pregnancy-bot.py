@@ -17,7 +17,7 @@ db = SQLAlchemy(app)
 class Risk(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(512))
-    comment = db.Column(db.String(512))
+    comment = db.Column(db.String(512), nullable=True)
     code = db.Column(db.String(512), nullable=True)
 
 
@@ -29,7 +29,7 @@ class Order(db.Model):
     end_params = db.Column(db.Text, nullable=True)
     start_week = db.Column(db.Integer, default=0)
     end_week = db.Column(db.Integer, nullable=True)
-    after_birth = True
+    after_birth = db.Column(db.Boolean, default=True)
     risks = db.relationship('Risk', secondary='order_risk')
 
     def run(self, contract):
@@ -113,39 +113,41 @@ class Contract(db.Model):
 
         start_time = int(time.time()) - 60 * 60
 
-        # control weight
-        try:
-            last_value = agents_api.get_records(self.id, 'weight', limit=1, time_from=start_time)['values'][0]['value']
-            week_value = [record['value'] for record in
-                          agents_api.get_records(self.id, 'weight', time_from=time_from, time_to=time_to)['values']]
+        if self.week() >= 14 and not self.is_born:
 
-            delta = last_value - sum(week_value) / len(week_value)
-            if delta >= 1:
-                send_warning_to_doctor(self.id,
-                                       "Предупреждение: последнее значение веса ({} кг) беременной превышает среднее за прошлую неделю ({} кг) на {} кг.".format(
-                                           last_value, week_value, delta))
+            # control weight
+            try:
+                last_value = agents_api.get_records(self.id, 'weight', limit=1, time_from=start_time)['values'][0]['value']
+                week_value = [record['value'] for record in
+                              agents_api.get_records(self.id, 'weight', time_from=time_from, time_to=time_to)['values']]
 
-        except Exception as e:
-            pass
-
-        try:
-            last_value = \
-                agents_api.get_records(self.id, 'waist_circumference', limit=2, time_from=start_time)['values'][0][
-                    'value']
-            week_value = [record['value'] for record in
-                          agents_api.get_records(self.id, 'waist_circumference', time_from=time_from, time_to=time_to)[
-                              'values']]
-
-            if week_value:
                 delta = last_value - sum(week_value) / len(week_value)
-                if delta <= 1:
+                if delta >= 1:
                     send_warning_to_doctor(self.id,
-                                           "Предупреждение: последнее обхвата талии ({} см) беременной по сравнению со средним за прошлую неделю ({} см) изменилось всего на {} см.".format(
+                                           "Предупреждение: последнее значение веса ({} кг) беременной превышает среднее за прошлую неделю ({} кг) на {} кг.".format(
                                                last_value, week_value, delta))
 
+            except Exception as e:
+                pass
 
-        except Exception as e:
-            print(e)
+            try:
+                last_value = \
+                    agents_api.get_records(self.id, 'waist_circumference', limit=2, time_from=start_time)['values'][0][
+                        'value']
+                week_value = [record['value'] for record in
+                              agents_api.get_records(self.id, 'waist_circumference', time_from=time_from, time_to=time_to)[
+                                  'values']]
+
+                if week_value:
+                    delta = last_value - sum(week_value) / len(week_value)
+                    if delta <= 1:
+                        send_warning_to_doctor(self.id,
+                                               "Предупреждение: последнее обхвата талии ({} см) беременной по сравнению со средним за прошлую неделю ({} см) изменилось всего на {} см.".format(
+                                                   last_value, week_value, delta))
+
+
+            except Exception as e:
+                print(e)
 
 
 class CurrentOrder(db.Model):
@@ -504,8 +506,8 @@ def action_save():
             <strong>Спасибо, окно можно закрыть</strong><script>window.parent.postMessage('close-modal-success','*');</script>
             """
 
+if __name__ == "__main__":
+    t = Thread(target=sender)
+    t.start()
 
-t = Thread(target=sender)
-t.start()
-
-app.run(port=PORT, host=HOST)
+    app.run(port=PORT, host=HOST)
