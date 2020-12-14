@@ -178,11 +178,173 @@ default_orders = [
         "risks": []
     },
     # medicines
-    #name = data['params']['name']
-    #mode = data['params']['mode']
-    #dosage = data['params']['dosage']
-    #amount = data['params']['amount']
-    #timetable = json.dumps(data['params']['timetable'])
+    # name = data['params']['name']
+    # mode = data['params']['mode']
+    # dosage = data['params']['dosage']
+    # amount = data['params']['amount']
+    # timetable = json.dumps(data['params']['timetable'])
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Фолиевая кислота",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "400 мкг/сут",
+            "amount": "400 мкг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Фолиевая кислота",
+        },
+        "start_week": 0,
+        "end_week": 13,
+        "after_birth": False,
+        "risks": []
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Калия йодид",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "200 мкг/сут",
+            "amount": "200 мкг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Калия йодид",
+        },
+        "start_week": 0,
+        "end_week": 44,
+        "after_birth": True,
+        "risks": []
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Витамин D",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "10 мкг/сут",
+            "amount": "10 мкг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Витамин D",
+        },
+        "start_week": 0,
+        "end_week": 44,
+        "after_birth": False,
+        "risks": ['risk_gv']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Кальций",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "1 г/сут",
+            "amount": "1 г/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Кальций",
+        },
+        "start_week": 0,
+        "end_week": 44,
+        "after_birth": False,
+        "risks": ['risk_pe']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Ацетилсаллициловая кислота",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "150 мг/сут",
+            "amount": "150 мг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Ацетилсаллициловая кислота",
+        },
+        "start_week": 14,
+        "end_week": 35,
+        "after_birth": False,
+        "risks": ['risk_pe']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Прогестерон натуральный",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "200-600 мг/сут",
+            "amount": "200-600 мг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Прогестерон натуральный",
+        },
+        "start_week": 0,
+        "end_week": 28,
+        "after_birth": False,
+        "risks": ['risk_vrt']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Прогестерон натуральный",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "200-400 мг/сут",
+            "amount": "200-400 мг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Прогестерон натуральный",
+        },
+        "start_week": 0,
+        "end_week": 28,
+        "after_birth": False,
+        "risks": ['risk_sa']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Прогестерон натуральный",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "200 мг/сут",
+            "amount": "200 мг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Прогестерон натуральный",
+        },
+        "start_week": 22,
+        "end_week": 33,
+        "after_birth": False,
+        "risks": ['risk_pr']
+    },
+    {
+        "start_order": "add_medicine",
+        "start_params": {
+            "name": "Витамин В6, пиридоксин",
+            "mode": "daily",
+            "timetable": timetable,
+            "dosage": "30 мг/сут",
+            "amount": "30 мг/сут"
+        },
+        "end_order": "remove_medicine",
+        "end_params": {
+            "name": "Витамин В6, пиридоксин",
+        },
+        "start_week": 0,
+        "end_week": 27,
+        "after_birth": False,
+        "risks": ['voming']
+    },
 ]
 
 for order in default_orders:

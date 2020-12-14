@@ -90,8 +90,6 @@ class Contract(db.Model):
         for order in Order.query.all():
             if order in self.current_orders:
                 continue
-            if order in self.done_orders:
-                continue
 
             if order.after_birth:
                 if self.is_born and self.check_risks(order) and self.add_order(order):
