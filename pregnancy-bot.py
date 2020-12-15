@@ -24,19 +24,20 @@ class Risk(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_order = db.Column(db.String(255))
-    start_params = db.Column(db.Text, nullable=True)
+    start_params = db.Column(db.JSON, nullable=True)
     end_order = db.Column(db.String(255))
-    end_params = db.Column(db.Text, nullable=True)
+    end_params = db.Column(db.JSON, nullable=True)
     start_week = db.Column(db.Integer, default=0)
     end_week = db.Column(db.Integer, nullable=True)
     after_birth = db.Column(db.Boolean, default=True)
     risks = db.relationship('Risk', secondary='order_risk')
+    comment = db.Column(db.Text, nullable=True)
 
     def run(self, contract):
-        return agents_api.send_order(contract.id, self.start_order, MONITORING_ID, self.start_params) == 1
+        return agents_api.send_order(contract.id, self.start_order, MONITORING_ID, json.loads(self.start_params)) == 1
 
     def stop(self, contract):
-        return agents_api.send_order(contract.id, self.start_order, MONITORING_ID, self.start_params) == 1
+        return agents_api.send_order(contract.id, self.end_order, MONITORING_ID, json.loads(self.end_params)) == 1
 
 
 class Contract(db.Model):
@@ -44,6 +45,8 @@ class Contract(db.Model):
     active = db.Column(db.Boolean, default=True)
     is_born = db.Column(db.Boolean, default=False)
     start = db.Column(db.Integer, nullable=True)
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
     current_orders = db.relationship('Order', secondary='current_order')
     done_orders = db.relationship('Order', secondary='done_order')
@@ -82,7 +85,7 @@ class Contract(db.Model):
         old_orders = []
 
         for order in self.current_orders:
-            criteria = [self.is_born and not order.after_birth, order.end_week and self.week() > order.end_week,
+            criteria = [self.is_born and not order.after_birth, order.end_week and self.week() > order.end_week,self.week() < order.start_week,
                         not self.check_risks(order)]
             if True in criteria and self.remove_order(order):
                 old_orders.append(order.comment)
@@ -91,11 +94,12 @@ class Contract(db.Model):
             if order in self.current_orders:
                 continue
 
-            if order.after_birth:
-                if self.is_born and self.check_risks(order) and self.add_order(order):
+            if self.is_born and not order.after_birth:
+                continue
+
+            if order.after_birth and self.is_born and self.check_risks(order) and self.add_order(order):
                     new_orders.append(order.comment)
-            else:
-                if self.week() >= order.start_week and self.week() <= order.end_week and self.check_risks(
+            elif self.week() >= order.start_week and self.week() <= order.end_week and self.check_risks(
                         order) and self.add_order(order):
                     new_orders.append(order.comment)
         if new_orders + old_orders:
@@ -151,11 +155,15 @@ class Contract(db.Model):
 class CurrentOrder(db.Model):
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id'), primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
 
 class DoneOrder(db.Model):
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id'), primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
 
 class ContractRisk(db.Model):
@@ -250,6 +258,7 @@ def init():
                     contract.risks.append(risk)
 
         db.session.commit()
+        contract.check_orders()
 
 
     except Exception as e:
@@ -257,7 +266,6 @@ def init():
         return "error"
 
     print('sending ok')
-    delayed(1, send_iteration, [])
     return 'ok'
 
 
@@ -322,6 +330,9 @@ def setting_save():
         contract = Contract.query.filter_by(id=contract_id).first()
         if contract:
             week = request.form.get('week')
+            if "is_born" in request.form:
+                contract.is_born = True
+
             if week and check_digit(week) and int(week) >= 0 and int(week) <= 40:
                 contract.start = get_start(int(week))
             if request.form.get('is_born'):
@@ -360,7 +371,7 @@ def send_warning_to_doctor(contract_id, a):
         print('connection error', e)
 
 
-def send_orders_warning(contract_id, a, b):
+def send_orders_warning(contract, a, b):
     try:
         message = "В соответствии с протоколом "
         if a:
@@ -369,7 +380,7 @@ def send_orders_warning(contract_id, a, b):
             message += "Также "
         if b:
             message += "отменены:\n - {}\n\n".format('\n - '.join(b))
-        agents_api.send_message(contract_id,
+        agents_api.send_message(contract.id,
                                 text=message, only_doctor = True)
     except Exception as e:
         print('connection error', e)
@@ -378,7 +389,7 @@ def send_orders_warning(contract_id, a, b):
 def send_warning(contract_id, a):
     try:
         agents_api.send_message(contract_id,
-                                text="Беременная сообщая о следующих симптомах - {}.".format(' / '.join(a)),
+                                text="Беременная сообщила о следующих симптомах - {}.".format(' / '.join(a)),
                                 is_urgent=True, only_doctor=True, need_answer=True)
     except Exception as e:
         print('connection error', e)

@@ -178,6 +178,7 @@ def send_order(contract_id, order, receiver_id=None, params=None):
         data['params'] = params
 
     try:
+        print(data)
         response = requests.post(MAIN_HOST + '/api/agents/order', json=data)
         print(response)
         answer = response.json()

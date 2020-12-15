@@ -1,5 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from config import *
+from flask import Flask
 
+app = Flask(__name__)
 db_string = "postgres://{}:{}@{}:{}/{}".format(DB_LOGIN, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_string
 db = SQLAlchemy(app)
@@ -8,14 +11,14 @@ db = SQLAlchemy(app)
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_order = db.Column(db.String(255))
-    start_params = db.Column(db.Text, nullable=True)
+    start_params = db.Column(db.JSON, nullable=True)
     end_order = db.Column(db.String(255))
-    end_params = db.Column(db.Text, nullable=True)
+    end_params = db.Column(db.JSON, nullable=True)
     start_week = db.Column(db.Integer, default=0)
     end_week = db.Column(db.Integer, nullable=True)
     after_birth = db.Column(db.Boolean, default=True)
     risks = db.relationship('Risk', secondary='order_risk')
-
+    comment = db.Column(db.Text, nullable=True)
 
 class Risk(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,6 +30,10 @@ class Risk(db.Model):
 class OrderRisk(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     risk_id = db.Column(db.Integer, db.ForeignKey('risk.id'), primary_key=True)
+
+OrderRisk.query.delete()
+Order.query.delete()
+Risk.query.delete()
 
 
 default_risks = [
@@ -78,8 +85,10 @@ default_risks = [
 ]
 
 for risk in default_risks:
-    object = Risk(name=risk['name'], comment=risk['comment'], code=risk['comment'])
+    object = Risk(name=risk['name'], comment=risk['comment'], code=risk['code'])
     db.session.add(object)
+
+db.session.commit()
 
 timetable = {
     "days_month": [],
@@ -104,7 +113,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 44,
         "after_birth": True,
-        "risks": []
+        "risks": [],
+        "comment": "мониторинг температуры",
     },
     {
         "start_order": "enable_monitoring",
@@ -130,7 +140,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 44,
         "after_birth": True,
-        "risks": []
+        "risks": [],
+        "comment": "мониторинг пульса и давления",
     },
     {
         "start_order": "enable_monitoring",
@@ -148,13 +159,14 @@ default_orders = [
         "start_week": 14,
         "end_week": 44,
         "after_birth": False,
-        "risks": []
+        "risks": [],
+        "comment": "мониторинг веса",
     },
     {
         "start_order": "enable_monitoring",
         "start_params": {
             "category": "waist_circumference",
-            "mode": "monthly",
+            "mode": "weekly",
             "timetable": {
                 "days_month": [],
                 "days_week": [
@@ -175,7 +187,8 @@ default_orders = [
         "start_week": 14,
         "end_week": 44,
         "after_birth": False,
-        "risks": []
+        "risks": [],
+        "comment": "мониторинг обхвата талии"
     },
     # medicines
     # name = data['params']['name']
@@ -199,7 +212,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 13,
         "after_birth": False,
-        "risks": []
+        "risks": [],
+        "comment": "назначение филиевой кислоты"
     },
     {
         "start_order": "add_medicine",
@@ -217,7 +231,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 44,
         "after_birth": True,
-        "risks": []
+        "risks": [],
+        "comment": "назначение йодида калия"
     },
     {
         "start_order": "add_medicine",
@@ -235,7 +250,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 44,
         "after_birth": False,
-        "risks": ['risk_gv']
+        "risks": ['risk_gv'],
+        "comment": "назначение витамина D"
     },
     {
         "start_order": "add_medicine",
@@ -253,7 +269,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 44,
         "after_birth": False,
-        "risks": ['risk_pe']
+        "risks": ['risk_pe'],
+        "comment": "назначение кальция"
     },
     {
         "start_order": "add_medicine",
@@ -271,7 +288,8 @@ default_orders = [
         "start_week": 14,
         "end_week": 35,
         "after_birth": False,
-        "risks": ['risk_pe']
+        "risks": ['risk_pe'],
+        "comment": "назначение ацетилсаллиициловой кислоты"
     },
     {
         "start_order": "add_medicine",
@@ -289,7 +307,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 28,
         "after_birth": False,
-        "risks": ['risk_vrt']
+        "risks": ['risk_vrt'],
+        "comment": "назначение прогестерона"
     },
     {
         "start_order": "add_medicine",
@@ -307,7 +326,8 @@ default_orders = [
         "start_week": 0,
         "end_week": 28,
         "after_birth": False,
-        "risks": ['risk_sa']
+        "risks": ['risk_sa'],
+        "comment": "назначение прогестерона"
     },
     {
         "start_order": "add_medicine",
@@ -325,7 +345,8 @@ default_orders = [
         "start_week": 22,
         "end_week": 33,
         "after_birth": False,
-        "risks": ['risk_pr']
+        "risks": ['risk_pr'],
+        "comment": "назначение прогестерона"
     },
     {
         "start_order": "add_medicine",
@@ -343,13 +364,14 @@ default_orders = [
         "start_week": 0,
         "end_week": 27,
         "after_birth": False,
-        "risks": ['voming']
+        "risks": ['voming'],
+        "comment": "назначение витамина В6 и пиридоксина при рвоте"
     },
 ]
 
 for order in default_orders:
     object = Order(start_order=order['start_order'], start_params=order['start_params'], end_order=order['end_order'], end_params=order['end_params'],
-                   start_week=order['start_week'], end_week=order['end_week'], after_birth=order['after_birth'])
+                   start_week=order['start_week'], end_week=order['end_week'], after_birth=order['after_birth'], comment=order['comment'])
 
     db.session.add(object)
 
