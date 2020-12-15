@@ -84,6 +84,9 @@ class Contract(db.Model):
         new_orders = []
         old_orders = []
 
+        if not self.week():
+            return
+
         for order in self.current_orders:
             criteria = [self.is_born and not order.after_birth, order.end_week and self.week() > order.end_week,self.week() < order.start_week,
                         not self.check_risks(order)]
