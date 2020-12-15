@@ -35,10 +35,10 @@ class Order(db.Model):
     comment = db.Column(db.Text, nullable=True)
 
     def run(self, contract):
-        return agents_api.send_order(contract.id, self.start_order, MONITORING_ID, json.loads(self.start_params)) == 1
+        return agents_api.send_order(contract.id, self.start_order, MONITORING_ID, self.start_params) == 1
 
     def stop(self, contract):
-        return agents_api.send_order(contract.id, self.end_order, MONITORING_ID, json.loads(self.end_params)) == 1
+        return agents_api.send_order(contract.id, self.end_order, MONITORING_ID, self.end_params) == 1
 
 
 class Contract(db.Model):
