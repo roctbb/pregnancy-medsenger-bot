@@ -82,34 +82,38 @@ class Contract(db.Model):
         return False
 
     def check_orders(self):
-        new_orders = []
-        old_orders = []
 
-        if not self.week():
-            return
+        try:
+            new_orders = []
+            old_orders = []
 
-        for order in self.current_orders:
-            criteria = [self.is_born and not order.after_birth, order.end_week and self.week() > order.end_week,self.week() < order.start_week,
-                        not self.check_risks(order)]
-            if True in criteria and self.remove_order(order):
-                old_orders.append(order.comment)
+            if not self.week():
+                return
 
-        for order in Order.query.all():
-            if order in self.current_orders:
-                continue
+            for order in self.current_orders:
+                criteria = [self.is_born and not order.after_birth, order.end_week and self.week() > order.end_week,self.week() < order.start_week,
+                            not self.check_risks(order)]
+                if True in criteria and self.remove_order(order):
+                    old_orders.append(order.comment)
 
-            if self.is_born and not order.after_birth:
-                continue
+            for order in Order.query.all():
+                if order in self.current_orders:
+                    continue
 
-            if order.after_birth and self.is_born and self.check_risks(order) and self.add_order(order):
-                    new_orders.append(order.comment)
-            elif self.week() >= order.start_week and self.week() <= order.end_week and self.check_risks(
-                        order) and self.add_order(order):
-                    new_orders.append(order.comment)
-        if new_orders + old_orders:
-            send_orders_warning(self, new_orders, old_orders)
+                if self.is_born and not order.after_birth:
+                    continue
 
-        db.session.commit()
+                if order.after_birth and self.is_born and self.check_risks(order) and self.add_order(order):
+                        new_orders.append(order.comment)
+                elif self.week() >= order.start_week and self.week() <= order.end_week and self.check_risks(
+                            order) and self.add_order(order):
+                        new_orders.append(order.comment)
+            if new_orders + old_orders:
+                send_orders_warning(self, new_orders, old_orders)
+
+            db.session.commit()
+        except Exception as e:
+            pass
 
     def check_measurements(self):
 
@@ -134,7 +138,10 @@ class Contract(db.Model):
                                                last_value, week_value, delta))
 
             except Exception as e:
-                pass
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                print(e)
 
             try:
                 last_value = \
