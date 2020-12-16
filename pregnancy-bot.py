@@ -394,15 +394,19 @@ def send_warning_to_doctor(contract_id, a):
 
 def send_orders_warning(contract, a, b):
     try:
-        message = "В соответствии с протоколом "
+        message = "В соответствии с протоколом ведения беременности "
         if a:
             message += "выполнены следующие назначения:\n - {}\n\n".format('\n - '.join(a))
         if a and b:
             message += "Также "
         if b:
             message += "отменены:\n - {}\n\n".format('\n - '.join(b))
-        agents_api.send_message(contract.id,
-                                text=message, only_doctor = True)
+
+        doctor_message = message + 'Изменить назначения можно в настройках интеллектуального агента "Мониторинг медицинских измерений и приема препаратов". <a href="https://drive.google.com/file/d/1PM4qWP2Cfm1p5W2fqbFC8iZahe5nhtjB/view?usp=sharing">Подробная схема мониторинга.</a>'
+        patient_message = message + 'Если у вас возникнут вопросы, их можно задать вашему лечащему врачу в чате.'
+
+        agents_api.send_message(contract.id, text=doctor_message, only_doctor=True)
+        agents_api.send_message(contract.id, text=patient_message, only_patient=True)
     except Exception as e:
         print('connection error', e)
 
