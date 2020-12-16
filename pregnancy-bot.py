@@ -264,12 +264,13 @@ def init():
 
         if data.get('preset', None) == 'pregnancy':
             for param, value in data.get('params', {}).items():
-                if param == 'week' and check_digit(value) and value >= 0 and value <= 40:
-                    contract.week = get_start(value)
+                if param == 'week' and check_digit(value) and int(value) >= 0 and int(value) <= 40:
+                    contract.week = get_start(int(value))
 
-                risk = Risk.query.filter_by(code=param).first()
-                if risk:
-                    contract.risks.append(risk)
+                if value == True:
+                    risk = Risk.query.filter_by(code=param).first()
+                    if risk:
+                        contract.risks.append(risk)
 
         db.session.commit()
         contract.check_orders()
