@@ -413,9 +413,16 @@ def send_orders_warning(contract, a, b):
 
 def send_warning(contract_id, a):
     try:
-        agents_api.send_message(contract_id,
-                                text="Беременная сообщила о следующих симптомах - {}.".format(' / '.join(a)),
-                                is_urgent=True, only_doctor=True, need_answer=True)
+        if a:
+            agents_api.send_message(contract_id,
+                                    text="Беременная сообщила о следующих симптомах - {}.".format(' / '.join(a)),
+                                    is_urgent=True, only_doctor=True, need_answer=True)
+            agents_api.send_message(contract_id,
+                                    text="Спасибо за заполнение опросника! Мы уведомили вашего врача о симптомах, которые вызывают беспокойство на вашем сроке беременности ({}). Он свяжется с вами в ближайшее время.".format(' / '.join(a)),
+                                    is_urgent=True, only_patient=True)
+        else:
+            agents_api.send_message(contract_id,
+                                    text="Спасибо за заполнение опросника! Скорее всего, перечисленные вами симптомы являются нормой для вашего срока беременности. Но если у вас остались вопросы, вы можете уточнить их у вашего лечащего врача в чате.", only_patient=True)
     except Exception as e:
         print('connection error', e)
 
@@ -509,10 +516,8 @@ def check_params(contract, data):
         report.append(('blood_discharge', 1))
         warnings.append('кровянистые выделения из половых путей')
 
-    # send warning
-    if len(warnings):
-        delayed(1, send_warning, [contract.id, warnings])
 
+    delayed(1, send_warning, [contract.id, warnings])
     delayed(1, agents_api.add_records, [contract.id, report])
 
 
