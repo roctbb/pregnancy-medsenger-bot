@@ -265,7 +265,7 @@ def init():
         if data.get('preset', None) == 'pregnancy':
             for param, value in data.get('params', {}).items():
                 if param == 'week' and check_digit(value) and int(value) >= 0 and int(value) <= 40:
-                    contract.week = get_start(int(value))
+                    contract.start = get_start(int(value))
 
                 if value == True:
                     risk = Risk.query.filter_by(code=param).first()
