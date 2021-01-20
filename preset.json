@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Неделя беременности",
+    "type": "number",
+    "required": true,
+    "description": "",
+    "default": "1",
+    "code": "week"
+  },
+  {
+    "name": "риск ГВ",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_gv"
+  },
+  {
+    "name": "риск ВРТ",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_vrt"
+  },
+  {
+    "name": "риск ПЭ",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_pe"
+  },
+  {
+    "name": "риск СА",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_sa"
+  },
+  {
+    "name": "риск ПР",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_pr"
+  },
+  {
+    "name": "риск ГБП",
+    "type": "checkbox",
+    "required": false,
+    "description": "",
+    "code": "risk_gbp"
+  }
+]
