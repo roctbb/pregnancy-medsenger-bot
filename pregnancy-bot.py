@@ -478,19 +478,13 @@ def check_params(contract, data):
     report = []
     warnings = []
 
-    if data.get('headache') and check_digit(data.get('headache'), [1, 10]):
-        pain = int(data.get('headache'))
-        report.append(('headache', pain))
+    if data.get('headache') == "warning":
+        report.append(('headache', 1))
+        warnings.append('головная боль')
 
-        if pain >= 5:
-            warnings.append('головная боль больше 5 баллов')
-
-    if data.get('vomiting') and check_digit(data.get('vomiting'), [1, 10]):
-        vomiting = int(data.get('vomiting'))
-        report.append(('vomiting', vomiting))
-
-        if vomiting >= 3 or (vomiting > 1 and contract.week() >= 14):
-            warnings.append('рвота {} раз(а)'.format(vomiting))
+    if data.get('vomiting') == "warning":
+        report.append(('vomiting', 1))
+        warnings.append('повторная рвота')
 
     if data.get('stomachache') == "warning":
         report.append(('stomachache', 1))

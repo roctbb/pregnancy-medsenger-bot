@@ -32,17 +32,15 @@
 
     <form method="POST" style="margin-top: 25px; font-size: 120%;">
         {% if contract.week() >= 20 %}
-            <div class="form-group">
-                <strong>Головная боль</strong>
-                <input name="headache" type="number" min="0" max="10"/>
-                <p>Если у вас болит голова, укажите интенсивность боли по шкале от 1 до 10.</p>
+            <div class="form-check">
+                <input type="checkbox" name="headache" value="warning" class="form-check-input"><label
+                    class="form-check-label">Болит голова.</label>
             </div>
         {% endif %}
 
-        <div class="form-group">
-            <strong>Рвота</strong>
-            <input name="vomiting" type="number" min="0" max="10"/>
-            <p>Если у вас была врота, укажите сколько раз.</p>
+        <div class="form-check">
+            <input type="checkbox" name="vomiting" value="warning" class="form-check-input"><label
+                class="form-check-label">Повторная рвота.</label>
         </div>
 
 
