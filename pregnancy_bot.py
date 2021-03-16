@@ -426,21 +426,27 @@ def send_warning(contract_id, a):
     except Exception as e:
         print('connection error', e)
 
+def tasks():
+    contracts = Contract.query.filter_by(active=True).all()
+
+    for contract in contracts:
+        if contract.start:
+            try:
+                contract.check_orders()
+                contract.check_measurements()
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                print("loop error", e)
+
+    db.session.commit()
 
 def sender():
     while True:
-        try:
-            contracts = Contract.query.filter_by(active=True).all()
+        tasks()
+        time.sleep(60 * 5)
 
-            for contract in contracts:
-                if contract.start:
-                    contract.check_orders()
-                    contract.check_measurements()
-
-            db.session.commit()
-            time.sleep(60 * 5)
-        except Exception as e:
-            print(e)
 
 
 @app.route('/message', methods=['POST'])
