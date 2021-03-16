@@ -511,8 +511,8 @@ def check_params(contract, data):
         warnings.append('кровянистые выделения из половых путей')
 
 
-    delayed(1, send_warning, [contract.id, warnings])
-    delayed(1, agents_api.add_records, [contract.id, report])
+    send_warning(contract.id, warnings)
+    agents_api.add_records(contract.id, report)
 
 
 @app.route('/frame', methods=['POST'])
